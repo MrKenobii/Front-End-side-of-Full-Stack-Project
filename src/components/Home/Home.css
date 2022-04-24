@@ -1,8 +1,0 @@
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    background-color: #cfe8fc;
-    height: 100vh;
-}
