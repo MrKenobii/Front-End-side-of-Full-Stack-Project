@@ -53,8 +53,11 @@ const Home = () => {
             text={post.text}
             index={index}
             postId={post.id}
+            likes={post.postlikes}
           ></Post>
         ))}
+        
+        
       </div>
     );
   }

@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Container from '@material-ui/core/Container';
+import Container from "@material-ui/core/Container";
 import CommentIcon from "@mui/icons-material/Comment";
 import { Link } from "react-router-dom";
 import Comment from "../Comment/Comment";
@@ -56,25 +56,42 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Post = ({ title, text, username, userId, index, postId }) => {
+const Post = ({ title, text, username, userId, index, postId, likes }) => {
   const [expanded, setExpanded] = React.useState(false);
-  const [liked, setLiked] = React.useState(false);
   const [error, setError] = React.useState(null);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [commentList, setCommentList] = React.useState([]);
+  const [isLiked, setIsLiked] = React.useState(false);
+  const [likeCount, setLikeCount] = React.useState(likes.length);
+
   const isInitialMount = React.useRef(true);
   const classes = useStyles();
+  const [likeId, setLikeId] = React.useState(null);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    refresComments();
+    refreshComments();
     console.log(commentList);
   };
   const handleLike = () => {
-    setLiked(!liked);
+    setIsLiked(!isLiked);
+    if (!isLiked) {
+      setLikeCount((prev) => prev - 1);
+      deleteLike();
+    } else {
+      setLikeCount((prev) => prev + 1);
+      saveLike();
+    }
+  };
+  const checkLikes = () => {
+    var likeControl = likes.find((like) => like.userId === userId);
+    if (likeControl != null) {
+      setLikeId(likeControl?.id);
+      setIsLiked(true);
+    }
   };
 
-  const refresComments = () => {
+  const refreshComments = () => {
     fetch(`/comments?postId=${postId}`)
       .then((res) => res.json())
       .then(
@@ -89,57 +106,87 @@ const Post = ({ title, text, username, userId, index, postId }) => {
         }
       );
   };
+  const saveLike = () => {
+    fetch('/likes', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        postId,
+        userId
+      })
+    })
+    .then(res => res.json())
+    .catch(err => console.log(err));
+  }
+
+  const deleteLike = () => {
+    fetch(`/likes/${likeId}`, {
+      method: 'DELETE',
+    })
+    .catch(err => console.log(err));
+  }
 
   React.useEffect(() => {
     if (isInitialMount.current) isInitialMount.current = false;
-    else refresComments();
+    else refreshComments();
   }, [commentList]);
 
+  React.useEffect(() => {
+    checkLikes();
+  }, []);
+
   return (
-    
-      <Card sx={{ maxWidth: 800 }} className={classes.root} key={index}>
-        <CardHeader
-          avatar={
-            <Link
-              className={classes.link}
-              to={{ pathname: "/users/" + userId }}
-            >
-              <Avatar aria-label="recipe" className={classes.avatar}>
-                {username.charAt(0).toUpperCase()}
-              </Avatar>
-            </Link>
-          }
-          style={{ textAlign: "left" }}
-          title={title}
-        />
-        <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            {text}
-          </Typography>
-        </CardContent>
-        <CardActions disableSpacing>
-          <IconButton onClick={handleLike} aria-label="add to favorites">
-            <FavoriteIcon style={liked ? { color: "red" } : null} />
-          </IconButton>
-          <ExpandMore
-            expand={expanded}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <CommentIcon />
-          </ExpandMore>
-        </CardActions>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Container fixed className = {classes.container}>
-                    {error? "error" :
-                    isLoaded? commentList.map((comment, index) => (
-                      <Comment userId = "1" userName ="USER" text = {comment.text} index={index}></Comment>
-                    )) : "Loading"}
-                    <CommentForm userId = "1" userName ="USER" postId={postId}></CommentForm>
-                    </Container>
-                </Collapse>
-      </Card>
+    <Card sx={{ maxWidth: 800 }} className={classes.root} key={index}>
+      <CardHeader
+        avatar={
+          <Link className={classes.link} to={{ pathname: "/users/" + userId }}>
+            <Avatar aria-label="recipe" className={classes.avatar}>
+              {username.charAt(0).toUpperCase()}
+            </Avatar>
+          </Link>
+        }
+        style={{ textAlign: "left" }}
+        title={title}
+      />
+      <CardContent>
+        <Typography variant="body2" color="text.secondary">
+          {text}
+        </Typography>
+      </CardContent>
+      <CardActions disableSpacing>
+        <IconButton onClick={handleLike} aria-label="add to favorites">
+          <FavoriteIcon style={!isLiked ? { color: "red" } : null} />
+        </IconButton>
+        {likeCount}
+        <ExpandMore
+          expand={expanded}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+        >
+          <CommentIcon />
+        </ExpandMore>
+      </CardActions>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Container fixed className={classes.container}>
+          {error
+            ? "error"
+            : isLoaded
+            ? commentList.map((comment, index) => (
+                <Comment
+                  userId="1"
+                  userName="USER"
+                  text={comment.text}
+                  index={index}
+                ></Comment>
+              ))
+            : "Loading"}
+          <CommentForm userId="1" userName="USER" postId={postId}></CommentForm>
+        </Container>
+      </Collapse>
+    </Card>
   );
 };
 
