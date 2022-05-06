@@ -28,7 +28,7 @@ const Home = () => {
           setPostList(result);
         },
         (error) => {
-          alert(error);
+          console.log(error);
           setIsLoaded(true);
           setError(error);
         }
@@ -44,7 +44,16 @@ const Home = () => {
   } else {
     return (
       <div className={classes.container}>
-        <PostForm userId={1} username={"Anil"} refreshPosts={refreshPosts} />
+        {localStorage.getItem("currentUser") === null ? (
+          null
+        ) : (
+          <PostForm
+            userId={localStorage.getItem("currentUser")}
+            username={localStorage.getItem("username")}
+            refreshPosts={refreshPosts}
+          />
+        )}
+
         {postList.map((post, index) => (
           <Post
             userId={post.userId}
@@ -56,8 +65,6 @@ const Home = () => {
             likes={post.postlikes}
           ></Post>
         ))}
-        
-        
       </div>
     );
   }

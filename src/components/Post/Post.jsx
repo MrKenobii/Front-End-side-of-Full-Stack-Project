@@ -67,6 +67,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
   const isInitialMount = React.useRef(true);
   const classes = useStyles();
   const [likeId, setLikeId] = React.useState(null);
+  let disabled = localStorage.getItem("currentUser") === null ? true : false ;
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -75,7 +76,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
   };
   const handleLike = () => {
     setIsLiked(!isLiked);
-    if (!isLiked) {
+    if (isLiked) {
       setLikeCount((prev) => prev - 1);
       deleteLike();
     } else {
@@ -84,7 +85,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
     }
   };
   const checkLikes = () => {
-    var likeControl = likes.find((like) => like.userId === userId);
+    var likeControl = likes.find((like) => like.userId.toString() === localStorage.getItem("currentUser"));
     if (likeControl != null) {
       setLikeId(likeControl?.id);
       setIsLiked(true);
@@ -110,11 +111,12 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
     fetch('/likes', {
       method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": localStorage.getItem("tokenKey")
       },
       body: JSON.stringify({
         postId,
-        userId
+        userId: localStorage.getItem("currentUser")
       })
     })
     .then(res => res.json())
@@ -124,6 +126,9 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
   const deleteLike = () => {
     fetch(`/likes/${likeId}`, {
       method: 'DELETE',
+      headers: {
+        "Authorization": localStorage.getItem("tokenKey")
+      },
     })
     .catch(err => console.log(err));
   }
@@ -156,8 +161,8 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton onClick={handleLike} aria-label="add to favorites">
-          <FavoriteIcon style={!isLiked ? { color: "red" } : null} />
+        <IconButton disabled={disabled} onClick={handleLike} aria-label="add to favorites">
+          <FavoriteIcon style={isLiked ? { color: "red" } : null} />
         </IconButton>
         {likeCount}
         <ExpandMore
@@ -183,7 +188,8 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
                 ></Comment>
               ))
             : "Loading"}
-          <CommentForm userId="1" userName="USER" postId={postId}></CommentForm>
+            {disabled ? null : <CommentForm userId="1" userName="USER" postId={postId}></CommentForm> }
+          
         </Container>
       </Collapse>
     </Card>

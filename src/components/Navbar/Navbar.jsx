@@ -8,6 +8,9 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
+import { LockOpen } from "@mui/icons-material";
+import LockIcon from '@mui/icons-material/Lock';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,8 +31,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Navbar = () => {
-  let userId = 5;
+  const navigate = useNavigate();
   const classes = useStyles();
+  const handleClick = () => {
+    localStorage.removeItem("tokenKey");
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("username");
+    navigate("/");
+  }
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
@@ -48,7 +57,16 @@ const Navbar = () => {
               <Link className={classes.link} to="/">Home</Link>
             </Typography>
             <Typography variant="h6" component="div">
-                <Link className={classes.link} to={{ pathname: "/users/" + userId }}>User</Link>
+              {localStorage.getItem("currentUser") === null ? 
+                <Link className={classes.link} to="/auth">Login/Register</Link> :
+                <div>
+                  <IconButton onClick={handleClick} className={classes.link}>
+                    <LockIcon></LockIcon>
+                  </IconButton>
+                  <Link className={classes.link} to={{ pathname: "/users/" + localStorage.getItem("currentUser") }}>Profile</Link>
+                </div>
+              }
+                
             </Typography>
             
           </Toolbar>
