@@ -10,10 +10,9 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Radio from "@mui/material/Radio";
-
+import { PutWithAuth } from "../../services/HttpService";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -40,7 +39,7 @@ const style = {
   p: 4,
 };
 
-const Avatar = ({ avatarId }) => {
+const Avatar = ({ avatarId, userId, username }) => {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [checked, setChecked] = React.useState([1]);
@@ -50,18 +49,8 @@ const Avatar = ({ avatarId }) => {
     setSelectedValue(event.target.value);
   };
   const saveAvatar = () => {
-    fetch(`/users/${localStorage.getItem("currentUser")}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: localStorage.getItem("tokenKey"),
-      },
-      body: JSON.stringify({
-        avatar: selectedValue,
-        id: localStorage.getItem("currentUser"),
-        username: localStorage.getItem("username"),
-        password: localStorage.getItem("tokenKey")
-      }),
+    PutWithAuth(`/users/${localStorage.getItem("currentUser")}`, {
+      avatar: selectedValue,
     })
       .then((res) => res.json())
       .catch((err) => console.log(err));
@@ -83,16 +72,20 @@ const Avatar = ({ avatarId }) => {
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
-            Username
+            {username}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             User Info
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={handleOpen}>
-            Change Avatar
-          </Button>
+          {localStorage.getItem("currentUser") == userId ? (
+            <Button size="small" onClick={handleOpen}>
+              Change Avatar
+            </Button>
+          ) : (
+            ""
+          )}
         </CardActions>
       </Card>
       <Modal

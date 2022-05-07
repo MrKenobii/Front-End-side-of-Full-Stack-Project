@@ -17,6 +17,7 @@ import CommentIcon from "@mui/icons-material/Comment";
 import { Link } from "react-router-dom";
 import Comment from "../Comment/Comment";
 import CommentForm from "../Comment/CommentForm";
+import {PostWithAuth, DeleteWithAuth} from '../../services/HttpService';
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -62,81 +63,85 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [commentList, setCommentList] = React.useState([]);
   const [isLiked, setIsLiked] = React.useState(false);
-  const [likeCount, setLikeCount] = React.useState(likes?.length);
-
   const isInitialMount = React.useRef(true);
-  const classes = useStyles();
+  const [likeCount, setLikeCount] = React.useState(likes.length);
   const [likeId, setLikeId] = React.useState(null);
-  let disabled = localStorage.getItem("currentUser") === null ? true : false ;
-
+  const [refresh, setRefresh] = React.useState(false);
+  let disabled = localStorage.getItem("currentUser") == null ? true:false;
+  const classes = useStyles();
+  
+  const setCommentRefresh = () => {
+    setRefresh(true);
+  }
   const handleExpandClick = () => {
     setExpanded(!expanded);
     refreshComments();
     console.log(commentList);
   };
+
   const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (isLiked) {
-      setLikeCount((prev) => prev - 1);
-      deleteLike();
-    } else {
-      setLikeCount((prev) => prev + 1);
-      saveLike();
-    }
-  };
-  const checkLikes = () => {
-    var likeControl = likes?.find((like) => like.userId.toString() === localStorage.getItem("currentUser"));
-    if (likeControl != null) {
-      setLikeId(likeControl?.id);
-      setIsLiked(true);
-    }
-  };
-
+   setIsLiked(!isLiked);
+   if(!isLiked){
+     saveLike();
+     setLikeCount(likeCount + 1)
+   }
+   else{
+     deleteLike();
+     setLikeCount(likeCount - 1)
+   }
+     
+  }
+  
   const refreshComments = () => {
-    fetch(`/comments?postId=${postId}`)
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          setIsLoaded(true);
-          setCommentList(result);
-        },
-        (error) => {
-          console.log(error);
-          setIsLoaded(true);
-          setError(error);
-        }
-      );
-  };
-  const saveLike = () => {
-    fetch('/likes', {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("tokenKey")
-      },
-      body: JSON.stringify({
-        postId,
-        userId: localStorage.getItem("currentUser")
-      })
-    })
-    .then(res => res.json())
-    .catch(err => console.log(err));
-  }
+   fetch("/comments?postId="+postId)
+   .then(res => res.json())
+   .then(
+       (result) => {
+           setIsLoaded(true);
+           setCommentList(result)
+       },
+       (error) => {
+           console.log(error)
+           setIsLoaded(true);
+           setError(error);
+       }
+   )
 
-  const deleteLike = () => {
-    fetch(`/likes/${likeId}`, {
-      method: 'DELETE',
-      headers: {
-        "Authorization": localStorage.getItem("tokenKey")
-      },
-    })
-    .catch(err => console.log(err));
-  }
+   setRefresh(false)
+ }
+
+ const saveLike = () => {
+   PostWithAuth("/likes",{
+     postId: postId, 
+     userId : localStorage.getItem("currentUser"),
+   })
+     .then((res) => res.json())
+     .catch((err) => console.log(err))
+ }
+
+ const deleteLike = () => {
+   DeleteWithAuth("/likes/"+likeId)
+     .catch((err) => console.log(err))
+ }
+
+ const checkLikes = () => {
+   var likeControl = likes.find((like =>  ""+like.userId === localStorage.getItem("currentUser")));
+   if(likeControl != null){
+     setLikeId(likeControl.id);
+     setIsLiked(true);
+   }
+ }
+ React.useEffect(() => {
+   if(isInitialMount.current)
+     isInitialMount.current = false;
+   else
+     refreshComments();
+ }, [refresh])
 
   React.useEffect(() => {
     if (isInitialMount.current) isInitialMount.current = false;
     else refreshComments();
-  }, [commentList]);
+  }, [refresh]);
 
   React.useEffect(() => {
     checkLikes();
@@ -181,14 +186,14 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
             : isLoaded
             ? commentList.map((comment, index) => (
                 <Comment
-                  userId="1"
-                  userName="USER"
+                  userId={comment.userId}
+                  userName={comment.username}
                   text={comment.text}
                   index={index}
                 ></Comment>
               ))
             : "Loading"}
-            {disabled ? null : <CommentForm userId={localStorage.getItem("currentUser")} username={localStorage.getItem("username")} postId={postId}></CommentForm> }
+            {disabled ? null : <CommentForm setCommentRefresh={setCommentRefresh} userId={localStorage.getItem("currentUser")} username={localStorage.getItem("username")} postId={postId}></CommentForm> }
           
         </Container>
       </Collapse>

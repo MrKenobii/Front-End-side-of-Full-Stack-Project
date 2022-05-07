@@ -16,6 +16,7 @@ import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import Post from "../Post/Post";
+import { GetWithAuth } from "../../services/HttpService";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -26,13 +27,7 @@ const PoopUp = ({ isOpen, postId, setIsOpen }) => {
   const [post, setPost] = React.useState();
 
   const getPost = () => {
-    fetch(`/posts/${postId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": localStorage.getItem("tokenKey"),
-        },
-      })
+    GetWithAuth(`/posts/${postId}`)
       .then(res => res.json())
       .then(
           (result) => {
@@ -54,6 +49,7 @@ const PoopUp = ({ isOpen, postId, setIsOpen }) => {
   React.useEffect(() => {
     getPost();
   }, [postId]);
+  console.log(post);
   return  (
     <Dialog
       fullScreen
@@ -76,8 +72,9 @@ const PoopUp = ({ isOpen, postId, setIsOpen }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-      {post? <Post likes = {post.postLikes} postId = {post.id} userId = {post.userId} username = {post.username}  
-                    title={post.title} text={post.text} index={post.id}></Post> : "loading"}     
+      {post && <Post likes = {post.postLikes} postId = {post.id} userId = {post.userId} username = {post.username}  
+                    title={post.title} text={post.text} index={post.id} />}
+                    {console.log(post)}     
     </Dialog>
 
   )
@@ -101,13 +98,7 @@ const UserActivity = ({ userId }) => {
   const [selectedPost, setSelectedPost] = React.useState(null);
 
   const getActivity = () => {
-    fetch(`/users/activity/${userId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("tokenKey"),
-      },
-    })
+    GetWithAuth(`/users/activity/${userId}`)
       .then((res) => res.json())
       .then((result) => {
         setIsLoaded(true);

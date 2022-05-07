@@ -4,21 +4,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
-import CardActions from "@mui/material/CardActions";
-import Collapse from "@mui/material/Collapse";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { red } from "@mui/material/colors";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import Button from "@mui/material/Button";
-
-import CommentIcon from "@mui/icons-material/Comment";
 import { Link } from "react-router-dom";
 import InputAdornment from "@mui/material/InputAdornment";
 import { Alert, Snackbar } from "@mui/material";
-
+import { PostWithAuth } from "../../services/HttpService";
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
@@ -64,17 +58,10 @@ const PostForm = ({ username, userId, refreshPosts }) => {
   const [isSent, setIsSent] = React.useState(false);
 
   const savePost = () => {
-    fetch("/posts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("tokenKey")
-      },
-      body: JSON.stringify({
-        title,
-        userId,
-        text,
-      }),
+    PostWithAuth("/posts", {
+      title,
+      userId,
+      text,
     })
       .then((res) => res.json())
       .catch((err) => console.log(err));

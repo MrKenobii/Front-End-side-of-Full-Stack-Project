@@ -1,12 +1,11 @@
 import React from "react";
 import {
-  Input,
   FormControl,
-  InputLabel,
   Button,
   FormHelperText,
 } from "@mui/material";
 import TextField from '@mui/material/TextField';
+import {PostWithoutAuth} from '../../services/HttpService';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -22,18 +21,13 @@ const Auth = () => {
     setPassword(value);
   };
   const sendRequest = (path) => {
-    fetch(`/auth/${path}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
+    PostWithoutAuth(`/auth/${path}`,{
+      username,
+      password,
     })
       .then((res) => res.json())
       .then((result) => {
+        console.log(result);
         localStorage.setItem("tokenKey", result.message);
         localStorage.setItem("currentUser", result.userId);
         localStorage.setItem("username", username);

@@ -1,6 +1,5 @@
 import React from "react";
 import Post from "../Post/Post";
-import Container from "@mui/material/Container";
 import { makeStyles } from "@material-ui/core/styles";
 import PostForm from "../Post/PostForm";
 
@@ -36,6 +35,7 @@ const Home = () => {
   };
   React.useEffect(() => {
     refreshPosts();
+    
   }, [postList]);
   if (error) {
     return <div>Error !!!</div>;

@@ -8,7 +8,7 @@ import {
   Avatar,
 } from "@material-ui/core";
 import Button from "@mui/material/Button";
-
+import { PostWithAuth } from "../../services/HttpService";
 const useStyles = makeStyles((theme) => ({
   comment: {
     display: "flex",
@@ -27,21 +27,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CommentForm = ({ userId, username, index, postId }) => {
+const CommentForm = ({ userId, username, index, postId, setCommentRefresh }) => {
   const classes = useStyles();
   const [text, setText] = React.useState('');
   const saveComment = () => {
-    fetch("/comments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": localStorage.getItem("tokenKey")
-      },
-      body: JSON.stringify({
-        postId,
-        userId,
-        text
-      }),
+    PostWithAuth("/comments", {
+      postId,
+      userId,
+      text
     })
       .then((res) => res.json())
       .catch((err) => console.log(err));
@@ -50,6 +43,7 @@ const CommentForm = ({ userId, username, index, postId }) => {
   const handleSubmit = () => {
       saveComment();
       setText('');
+      setCommentRefresh();
   };
 
   const handleChange = (value) => {

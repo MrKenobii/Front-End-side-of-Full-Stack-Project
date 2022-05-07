@@ -4,6 +4,7 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import Avatar from '../Avatar/Avatar';
 import UserActivity from '../UserActivity/UserActivity';
+import { GetWithAuth } from '../../services/HttpService';
 const useStyles = makeStyles( {
     root: {
         display: 'flex'
@@ -15,13 +16,7 @@ const User = () => {
     const [user, setUser] = React.useState();
     
     const getUser = () => {
-        fetch(`/users/${userId}`, {
-            method: "GET",
-            headers:{
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("tokenKey")
-            }
-        })
+        GetWithAuth(`/users/${userId}`)
         .then(res => res.json())
         .then(
             (result) => {
@@ -39,8 +34,8 @@ const User = () => {
         }, [])
     return (
         <div className={classes.root}>
-            {user? <Avatar avatarId={user.avatar} />: ""}
-            <UserActivity userId={userId} />
+            {user? <Avatar avatarId={user.avatar} userId={userId} username={user.username} />: ""}
+            {localStorage.getItem("currentUser") === userId ? <UserActivity userId={userId} />: null}
         </div>
     )
 }
