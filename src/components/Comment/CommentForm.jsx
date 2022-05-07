@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CommentForm = ({ userId, userName, index, postId }) => {
+const CommentForm = ({ userId, username, index, postId }) => {
   const classes = useStyles();
   const [text, setText] = React.useState('');
   const saveComment = () => {
@@ -84,7 +84,7 @@ const CommentForm = ({ userId, userName, index, postId }) => {
               to={{ pathname: "/users/" + userId }}
             >
               <Avatar aria-label="recipe" className={classes.small}>
-                {userName.charAt(0).toUpperCase()}
+                {username.charAt(0).toUpperCase()}
               </Avatar>
             </Link>
           </InputAdornment>

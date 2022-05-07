@@ -56,13 +56,13 @@ const Home = () => {
 
         {postList.map((post, index) => (
           <Post
-            userId={post.userId}
-            username={post.username}
-            title={post.title}
-            text={post.text}
+            userId={post?.userId}
+            username={post?.username}
+            title={post?.title}
+            text={post?.text}
             index={index}
-            postId={post.id}
-            likes={post.postlikes}
+            postId={post?.id}
+            likes={post?.postlikes}
           ></Post>
         ))}
       </div>

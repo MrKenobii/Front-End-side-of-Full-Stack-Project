@@ -5,7 +5,7 @@ import './App.css'
 import User from './components/User/User';
 import Home from './components/Home/Home';
 import Navbar from './components/Navbar/Navbar';
-import Auth from './Auth/Auth';
+import Auth from './components/Auth/Auth';
 function App() {
   return (
     <div className="App">

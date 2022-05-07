@@ -62,7 +62,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [commentList, setCommentList] = React.useState([]);
   const [isLiked, setIsLiked] = React.useState(false);
-  const [likeCount, setLikeCount] = React.useState(likes.length);
+  const [likeCount, setLikeCount] = React.useState(likes?.length);
 
   const isInitialMount = React.useRef(true);
   const classes = useStyles();
@@ -85,7 +85,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
     }
   };
   const checkLikes = () => {
-    var likeControl = likes.find((like) => like.userId.toString() === localStorage.getItem("currentUser"));
+    var likeControl = likes?.find((like) => like.userId.toString() === localStorage.getItem("currentUser"));
     if (likeControl != null) {
       setLikeId(likeControl?.id);
       setIsLiked(true);
@@ -148,7 +148,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
         avatar={
           <Link className={classes.link} to={{ pathname: "/users/" + userId }}>
             <Avatar aria-label="recipe" className={classes.avatar}>
-              {username.charAt(0).toUpperCase()}
+              {username?.charAt(0).toUpperCase()}
             </Avatar>
           </Link>
         }
@@ -188,7 +188,7 @@ const Post = ({ title, text, username, userId, index, postId, likes }) => {
                 ></Comment>
               ))
             : "Loading"}
-            {disabled ? null : <CommentForm userId="1" userName="USER" postId={postId}></CommentForm> }
+            {disabled ? null : <CommentForm userId={localStorage.getItem("currentUser")} username={localStorage.getItem("username")} postId={postId}></CommentForm> }
           
         </Container>
       </Collapse>
